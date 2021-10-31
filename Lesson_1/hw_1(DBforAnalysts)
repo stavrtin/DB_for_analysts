@@ -1,0 +1,81 @@
+'select * 	
+from world.orders_20190822 limit 10'
+
+
+
+
+'2. ѕроанализировать, какой период данных выгружен'
+select min(o_date), max(o_date) 
+from world.orders_20190822
+
+
+'3. ѕосчитать кол-во строк, кол-во заказов и кол-во уникальных пользователей, кот совершали заказы.'
+
+select count(*) as 'кол-во строк', 
+		 count(distinct id_o) as 'кол-во заказов', 
+		 count(distinct user_id) as 'кол-во пользов'
+from world.orders_20190822
+
+'4. ѕо годам и мес€цам посчитать средний чек, среднее кол-во заказов на пользовател€, сделать вывод , 
+ как измен€лись это показатели √од от года.'
+ select year(o_date) as 'год', month(o_date) as 'мес€ц', 
+		avg(price) as 'сред.чек', 
+		avg(id_o) as 'ср.кол-во заказов'
+ from world.orders_20190822
+group by year(o_date), month (o_date)
+
+#ѕри незначительном увеличении среднего чека наблюдаетс€ увеличение среднего количества заказов
+
+
+
+'5. Ќайти кол-во пользователей, кот покупали в одном году и перестали покупать в следующем.'
+select count(distinct user_id)
+from world.orders_20190822 o
+where year(o_date) = 2016 and user_id not in  
+(
+select user_id
+from world.orders_20190822 o 
+where year(o_date) = 2017
+)
+
+' 6. Ќайти ID самого активного по кол-ву покупок пользовател€.'
+select user_id, count(id_o) as count
+from world.orders_20190822 o 
+group by user_id 
+order by count desc limit 1
+
+
+'7. Ќайти коэффициенты сезонности по мес€цам.'
+select @sum_2016 := sum(price)
+from world.orders_20190822 o 
+where year (o_date) = 2016;
+
+
+select @sum_2017 := sum(price)
+from world.orders_20190822 o 
+where year (o_date) = 2017;
+
+select year (o_date), month (o_date), sum(price)/(select if (year (o_date) = 2016,
+
+						(select sum(price)/12
+						from world.orders_20190822 o 
+						where year (o_date) = 2016),
+
+						(select sum(price)/12
+						from world.orders_20190822 o 
+						where year (o_date) = 2017))) as koef
+
+from world.orders_20190822 o 
+group by year (o_date), month (o_date)
+
+ 
+
+
+
+
+
+
+
+
+
+
