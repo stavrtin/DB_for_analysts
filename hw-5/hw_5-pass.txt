@@ -1,0 +1,112 @@
+Константин, добрый день.
+Приходится ставить заглушку, не успеваю выполнить ДЗ. Смогу доделать только к 15.12.21
+Если это возможно, примите пока так. Или требуется в поддержке запрашивать продление срока?
+Спасиобо.
+  
+
+Урок 5. Системы web-аналитики
+Занятие 4
+
+Главная задача: сделать RFM-анализ на основе данных по продажам за 2 года (из предыдущего дз).
+?
+Что делаем:
+1. Определяем критерии для каждой буквы R, F, M (т.е. к примеру, R – 3 для клиентов, которые покупали <= 30 дней от последней даты в базе, R – 2 для клиентов, которые покупали > 30 и менее 60 дней от последней даты в базе и т.д.)
+2. Для каждого пользователя получаем набор из 3 цифр (от 111 до 333, где 333 – самые классные пользователи)
+3. Вводим группировку, к примеру, 333 и 233 – это Vip, 1XX – это Lost, остальные Regular ( можете ввести боле глубокую сегментацию)
+4. Для каждой группы из п. 3 находим кол-во пользователей, кот. попали в них и % товарооборота, которое они сделали на эти 2 года.
+5. Проверяем, что общее кол-во пользователей бьется с суммой кол-во пользователей по группам из п. 3 (если у вас есть логические ошибки в создании
+
+Select t.user_id -- , count(tt.id_o) as n
+  From 
+  (
+SELECT user_id, min(o_date) as mind
+  FROM public.orders_20190822
+  GROUP BY user_id
+  ) t
+  join 
+    (
+SELECT user_id, o_date , id_o
+  FROM public.orders_20190822
+--  GROUP BY user_id
+  ) tt
+  ON t.user_id = tt.user_id
+  Where t.mind = tt.o_date
+  Group BY t.user_id
+  Having count(tt.id_o)  > 1;
+
+
+SELECT t.user_id, tt.sec_date - t.f_date, tt.sec_date, t.f_date
+  From 
+  (
+SELECT user_id, min(o_date) as f_date
+  FROM public.orders_20190822
+  GROUP BY user_id
+Having count(id_o) > 1
+) t
+  JOIN 
+  (
+SELECT user_id, min(o_date) as sec_date
+  FROM public.orders_20190822
+  where id_o not IN 
+  (
+SELECT min(id_o)
+  FROM public.orders_20190822
+  GROUP BY user_id  
+  )
+  GROUP BY user_id
+  ) tt
+  ON t.user_id = tt.user_id;
+
+
+SELECT o_date, sum(price) as s
+  FROM public.orders_20190822
+where extract(year from o_date) = 2017 and extract(month from o_date) = 11
+  Group by o_date;
+
+
+SELECT *
+  FROM public.orders_20190822;
+-- РЎРµР·РѕРЅРЅРѕСЃС‚СЊ
+-- РўСЂРµРЅРґ
+-- РџРѕРєСѓРїР°С‚РµР»Рё + СЃРµРіРјРµРЅС‚Р°С†РёСЏ
+-- РЎСЂ С‡РµРє ()
+-- РџСЂРёС‚РѕРє РЅРѕРІС‹С…
+-- Р”РѕР»СЏ РїРѕРІС‚РѕСЂРЅС‹С…
+
+
+  Select t.yyyymm, count(t.user_id)
+  From 
+    (
+SELECT user_id, extract(year from min(o_date))*100 + extract(month from min(o_date)) as yyyymm
+  FROM public.orders_20190822
+  Group by user_id
+    ) t
+    Group by t.yyyymm;
+
+
+SELECT avg(t.avg_price)
+  From 
+  (
+    SELECT user_id, sum(price)/count(id_o) as avg_price
+  FROM public.orders_20190822
+  Group by user_id
+      Having min(o_date) > date('2016-04-01')
+  ) t;
+
+-- 2406
+-- 2151
+Select avg(price)
+  From public.orders_20190822
+  Where id_o not in 
+  (
+SELECT min(id_o) as mid
+FROM public.orders_20190822 
+  where user_id in 
+(
+    SELECT user_id
+  FROM public.orders_20190822
+  Group by user_id
+      Having min(o_date) > date('2016-04-01')
+  )
+  GROUP by user_id
+);
