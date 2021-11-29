@@ -1,14 +1,14 @@
 
-Client			    Zakaz		    Hotel		        staff
-id_client		    id_zakaz	  id_hotel	      id_staff
-fio			        id_staff	  country		      fio
-email		  	    id_client	  city		        tel
-tel			        date		    contacts	      email
+Client			    Zakaz	   Hotel		  staff
+id_client		id_zakaz	  id_hotel	      	id_staff
+fio			id_staff	  country		fio
+email		  	id_client	  city		        tel
+tel			date		  contacts	      	email
 status		    	contry		  hotel_star		
-chanel_prihod		city		    type_rooms		
-bonus			      groups		  type_food		
-promo			      viza				
-			          target_vizit				
-                peresadki				
-			          type_pay				
-			          price				
+chanel_prihod		city		  type_rooms		
+bonus			groups		  type_food		
+promo			viza				
+			target_vizit				
+                	peresadki				
+			type_pay				
+			price				
